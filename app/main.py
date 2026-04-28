@@ -1,13 +1,11 @@
 from fastapi import FastAPI
 
-app = FastAPI()
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+from app.api.endpoints import router
+from app.config import settings
+app = FastAPI(
+    title="AIBot — AI Telegram News Publisher",
+    description="Service for autogeneration and publication AI posts to Telegram based on news.",
+    version="0.1.0",
+    debug=settings.debug
+)
+app.include_router(router)
