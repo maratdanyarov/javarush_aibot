@@ -5,6 +5,7 @@ description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.136.0",
+    "pydantic-settings>=2.14.0",
     "uvicorn>=0.45.0",
 ]
 
