@@ -217,5 +217,8 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+dev.db
+
+
 CLAUDE.md
 TICKETS.md
