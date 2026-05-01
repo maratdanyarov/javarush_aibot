@@ -39,7 +39,9 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url", settings.database_url)
+    # Take the async URL and strip out "+aiosqlite"
+    sync_url = settings.database_url.replace("+aiosqlite", "")
+    url = config.get_main_option("sqlalchemy.url", sync_url)
     context.configure(
         url=url,
         target_metadata=target_metadata,

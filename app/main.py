@@ -1,13 +1,22 @@
 from fastapi import FastAPI
+from loguru import logger
 
 from app.api.endpoints import router
 from app.config import settings
 
+logger.add(
+    "logs/aibot.log",
+    rotation="10 MB",  # New file every 10 mb
+    retention="7 days",  # keep 7 days
+    level=settings.log_level,
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level:<8} | {name} | {message}",
+    encoding="utf-8",
+)
 app = FastAPI(
     title="AIBot — AI Telegram News Publisher",
     description="Service for autogeneration and publication "
-                "AI posts to Telegram based on news.",
+    "AI posts to Telegram based on news.",
     version="0.1.0",
-    debug=settings.debug
+    debug=settings.debug,
 )
 app.include_router(router)
