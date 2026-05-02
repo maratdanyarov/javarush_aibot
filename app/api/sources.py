@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from app.api.sources import SourceCreate, SourceRead, SourceUpdate
+from app.api.schemas import SourceCreate, SourceRead, SourceUpdate
 from app.db import get_db
 from app.models import Source
 

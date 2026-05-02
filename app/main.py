@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from loguru import logger
 
-from app.api.endpoints import router
+from app.api import sources
+from app.api import keywords
 from app.config import settings
 
 logger.add(
@@ -19,4 +20,5 @@ app = FastAPI(
     version="0.1.0",
     debug=settings.debug,
 )
-app.include_router(router)
+app.include_router(sources.router)
+app.include_router(keywords.router)
