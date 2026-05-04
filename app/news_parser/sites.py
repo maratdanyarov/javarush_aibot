@@ -12,45 +12,46 @@ from app.models import NewsItem, Source
 from app.utils import make_content_hash
 
 
-async def fetch_from_site(source: Source, db: AsyncSession) -> list[NewsItem]:
-    raw_news_items = await _parse_rss(source.url)
-    if not raw_news_items:
-        logger.info(f"No news found for {source.url}")
-        return []
+class SiteParser:
+    async def fetch(self, source: Source, db_session: AsyncSession) -> list[NewsItem]:
+        raw_news_items = await _parse_rss(source.url)
+        if not raw_news_items:
+            logger.info(f"No news found for {source.url}")
+            return []
 
-    news_items = []
+        news_items = []
 
-    for item in raw_news_items:
-        if not item.get("title"):
-            continue
+        for item in raw_news_items:
+            if not item.get("title"):
+                continue
 
-        content_hash = make_content_hash(item["title"], item.get("url", ""))
-        if await _is_duplicate(content_hash, db):
-            logger.debug(f"Duplicate skipped: {item['title'][:50]}")
-            continue
+            content_hash = make_content_hash(item["title"], item.get("url", ""))
+            if await _is_duplicate(content_hash, db_session):
+                logger.debug(f"Duplicate skipped: {item['title'][:50]}")
+                continue
 
-        news_item = NewsItem(
-            title=item["title"],
-            url=item.get("url"),
-            summary=item.get("summary", ""),
-            raw_text=item.get("raw_text"),
-            source=item.get("source", source.name),
-            source_id=source.id,
-            published_at=item.get("published_at") or datetime.now(UTC),
-            content_hash=content_hash,
-        )
+            news_item = NewsItem(
+                title=item["title"],
+                url=item.get("url"),
+                summary=item.get("summary", ""),
+                raw_text=item.get("raw_text"),
+                source=item.get("source", source.name),
+                source_id=source.id,
+                published_at=item.get("published_at") or datetime.now(UTC),
+                content_hash=content_hash,
+            )
 
-        db.add(news_item)
-        await db.flush()
-        news_items.append(news_item)
+            db_session.add(news_item)
+            await db_session.flush()
+            news_items.append(news_item)
 
-    if news_items:
-        await db.commit()
-        logger.info(f"Saved {len(news_items)} news items for {source.name}")
-    else:
-        logger.info(f"No news items for {source.name}")
+        if news_items:
+            await db_session.commit()
+            logger.info(f"Saved {len(news_items)} news items for {source.name}")
+        else:
+            logger.info(f"No news items for {source.name}")
 
-    return news_items
+        return news_items
 
 
 async def _parse_rss(url: str) -> list[dict]:

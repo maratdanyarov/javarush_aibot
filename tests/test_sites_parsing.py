@@ -5,10 +5,11 @@ import pytest
 from sqlalchemy import select
 
 from app.models import NewsItem, Source, SourceType
-from app.news_parser.sites import fetch_from_site
+from app.news_parser.sites import SiteParser
 from app.utils import make_content_hash
 
 pytestmark = pytest.mark.asyncio
+site_parser = SiteParser()
 
 
 async def test_fetch_from_site_success(db_session):
@@ -43,8 +44,8 @@ async def test_fetch_from_site_success(db_session):
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        news_items = await fetch_from_site(source, db_session)
-        # Assert: Check return value
+        news_items = await site_parser.fetch(source, db_session)
+
         assert len(news_items) == 1
         assert news_items[0].title == "Test News Title"
         assert news_items[0].url == "https://test.com/news/1"
@@ -81,7 +82,6 @@ async def test_fetch_from_site_duplicate_skipping(db_session):
     db_session.add(existing_item)
     await db_session.flush()
 
-    #
     mock_rss_content = f"""<?xml version="1.0" encoding="UTF-8" ?>
     <rss version="2.0">
     <channel>
@@ -99,6 +99,6 @@ async def test_fetch_from_site_duplicate_skipping(db_session):
         mock_resp.content = mock_rss_content
         mock_get.return_value = mock_resp
 
-        news_items = await fetch_from_site(source, db_session)
+        news_items = await site_parser.fetch(source, db_session)
 
         assert len(news_items) == 0
