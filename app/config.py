@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     # Redis
     redis_url: RedisDsn = Field(alias="REDIS_URL")
 
+    # Celery
+    celery_task_serializer: str = "json"
+
     # Telegram bot token
     bot_token: SecretStr = Field(alias="BOT_TOKEN")
     tg_channel: str = Field(alias="TG_CHANNEL")

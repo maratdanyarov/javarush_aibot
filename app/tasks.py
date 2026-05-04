@@ -1,0 +1,74 @@
+import asyncio
+
+from celery import chain
+from loguru import logger
+from sqlalchemy import select
+
+from app.db import AsyncSessionLocal
+from app.models import Source
+from app.news_parser.registry import PARSERS
+from celery_worker import celery_app
+
+
+@celery_app.task(name="app.tasks.fetch_news_task", bind=True, max_retries=3)
+def fetch_news_task(self):
+    logger.info("Starting scheduled fetch_news_task.")
+
+    async def _run():
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(select(Source).where(Source.enabled.is_(True)))
+            sources = result.scalars().all()
+
+            if not sources:
+                logger.warning("No enabled sources found.")
+                return []
+
+            all_new_ids = []
+
+            for source in sources:
+                try:
+                    parser = PARSERS.get(source.type)
+                    if parser is None:
+                        logger.warning(
+                            f"No parser registered for '{source.type}', "
+                            f"skipping '{source.name}'"
+                        )
+                        continue
+                    saved_items = await parser.fetch(source, db)
+                    all_new_ids.extend(item.id for item in saved_items)
+                    logger.info(
+                        f"Source '{source.name}': saved {len(saved_items)} news items."
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to fetch source '{source.name}': {e}")
+
+            logger.info(f"fetch_news_task done. Saved {len(all_new_ids)} news items.")
+
+            chain(
+                filter_task.s(all_new_ids), generate_task.s(), publish_task.s()
+            ).delay()
+            return all_new_ids
+
+    try:
+        return asyncio.run(_run())
+    except Exception as e:
+        logger.error(f"Failed to run fetch_news_task: {e}")
+        raise self.retry(exc=e, countdown=60) from e
+
+
+@celery_app.task
+def filter_task(news_item_ids: list[str]):
+    logger.info("Starting filter_task.")
+    return news_item_ids
+
+
+@celery_app.task
+def generate_task(news_item_ids: list[str]):
+    logger.info("Starting generate_task.")
+    return news_item_ids
+
+
+@celery_app.task
+def publish_task(news_item_ids: list[str]):
+    logger.info("Starting publish_task.")
+    return

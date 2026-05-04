@@ -59,7 +59,9 @@ class NewsItem(Base):
     source_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("sources.id"), nullable=True
     )
-    content_hash: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    content_hash: Mapped[str | None] = mapped_column(
+        String(32), nullable=True, index=True
+    )
     published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
