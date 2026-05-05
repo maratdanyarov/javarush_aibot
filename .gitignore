@@ -220,6 +220,10 @@ __marimo__/
 *.db
 /logs
 
+# Telethon session
+*.session
+*.session-journal
+
 CLAUDE.md
 TICKETS.md
 GEMINI.md

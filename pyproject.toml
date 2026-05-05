@@ -16,6 +16,7 @@ dependencies = [
     "httpx>=0.28.1",
     "celery>=5.6.3",
     "redis>=7.4.0",
+    "telethon>=1.43.2",
 ]
 
 [dependency-groups]

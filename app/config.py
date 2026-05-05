@@ -28,8 +28,9 @@ class Settings(BaseSettings):
     # Telegram bot token
     bot_token: SecretStr = Field(alias="BOT_TOKEN")
     tg_channel: str = Field(alias="TG_CHANNEL")
-    telegram_api_id: str = Field(alias="TELEGRAM_API_ID")
+    telegram_api_id: int = Field(alias="TELEGRAM_API_ID")
     telegram_api_hash: SecretStr = Field(alias="TELEGRAM_API_HASH")
+    telegram_session_file: str = Field(alias="TELEGRAM_SESSION_FILE")
 
     # ChatGPT
     chat_gpt_api_key: SecretStr = Field(alias="CHATGPT_API_KEY")
