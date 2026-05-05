@@ -5,11 +5,10 @@ import feedparser
 import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import NewsItem, Source
-from app.utils import make_content_hash
+from app.utils import is_duplicate, make_content_hash
 
 
 class SiteParser:
@@ -26,7 +25,7 @@ class SiteParser:
                 continue
 
             content_hash = make_content_hash(item["title"], item.get("url", ""))
-            if await _is_duplicate(content_hash, db_session):
+            if await is_duplicate(content_hash, db_session):
                 logger.debug(f"Duplicate skipped: {item['title'][:50]}")
                 continue
 
@@ -146,9 +145,3 @@ def _strip_html(text: str) -> str:
         return ""
     return BeautifulSoup(text, "html.parser").get_text(separator="").strip()
 
-
-async def _is_duplicate(content_hash: str, db: AsyncSession) -> bool:
-    result = await db.execute(
-        select(NewsItem.id).where(NewsItem.content_hash == content_hash).limit(1)
-    )
-    return result.scalar() is not None

@@ -1,5 +1,10 @@
 import hashlib
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import NewsItem
+
 
 def make_content_hash(title: str, url: str = "") -> str:
     """
@@ -8,3 +13,10 @@ def make_content_hash(title: str, url: str = "") -> str:
     """
     raw = f"{title.lower().strip()}|{url.lower().strip()}"
     return hashlib.md5(raw.encode()).hexdigest()
+
+
+async def is_duplicate(content_hash: str, db: AsyncSession) -> bool:
+    result = await db.execute(
+        select(NewsItem.id).where(NewsItem.content_hash == content_hash).limit(1)
+    )
+    return result.scalar() is not None
