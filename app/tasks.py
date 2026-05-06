@@ -5,7 +5,8 @@ from loguru import logger
 from sqlalchemy import select
 
 from app.db import AsyncSessionLocal
-from app.models import Source
+from app.filters import is_duplicate, is_relevant
+from app.models import Keyword, NewsItem, Source
 from app.news_parser.registry import PARSERS
 from celery_worker import celery_app
 
@@ -56,10 +57,31 @@ def fetch_news_task(self):
         raise self.retry(exc=e, countdown=60) from e
 
 
-@celery_app.task
-def filter_task(news_item_ids: list[str]):
+@celery_app.task(name="app.tasks.filter_task", bind=True, max_retries=3)
+def filter_task(self, news_item_ids: list[str]):
     logger.info("Starting filter_task.")
-    return news_item_ids
+
+    async def _run():
+        async with AsyncSessionLocal() as db:
+            kw_result = await db.execute(
+                select(Keyword).where(Keyword.enabled.is_(True))
+            )
+            keywords = [kw.word for kw in kw_result.scalars().all()]
+            filtered_results = []
+            for news_item_id in news_item_ids:
+                item = await db.get(NewsItem, news_item_id)
+                if item is None:
+                    continue
+                if not await is_duplicate(item, db) and is_relevant(item, keywords):
+                    filtered_results.append(news_item_id)
+
+        return filtered_results
+
+    try:
+        return asyncio.run(_run())
+    except Exception as e:
+        logger.error(f"Failed to run filter_task: {e}")
+        raise self.retry(exc=e, countdown=60) from e
 
 
 @celery_app.task
