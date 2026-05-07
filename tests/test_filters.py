@@ -1,8 +1,10 @@
 from datetime import UTC, datetime
+from unittest.mock import patch
 
 import pytest
+from langdetect import LangDetectException
 
-from app.filters import is_duplicate, is_relevant
+from app.filters import is_allowed_language, is_duplicate, is_relevant
 from app.models import NewsItem
 
 
@@ -67,3 +69,30 @@ async def test_is_duplicate_false_same_object(db_session):
     await db_session.flush()
 
     assert await is_duplicate(item, db_session) is False
+
+
+def test_is_allowed_language_match():
+    item = NewsItem(
+        title="Title",
+        summary="This is a long enough text to trigger detection",
+        raw_text="This is a long enough English sentence",
+    )
+    with patch("app.filters.detect") as mock_detect:
+        mock_detect.return_value = "en"
+        assert is_allowed_language(item, ["en", "ru"]) is True
+
+
+def test_is_allowed_language_not_match():
+    item = NewsItem(
+        title="Title", summary="Some text", raw_text="Ceci est un texte français"
+    )
+    with patch("app.filters.detect") as mock_detect:
+        mock_detect.return_value = "fr"
+        assert is_allowed_language(item, ["en", "ru"]) is False
+
+
+def test_is_allowed_language_exception_returns_true():
+    item = NewsItem(title="Title", summary="Text", raw_text="!!! " * 8)
+    with patch("app.filters.detect") as mock_detect:
+        mock_detect.side_effect = LangDetectException(0, "No features in text")
+        assert is_allowed_language(item, ["en"]) is True

@@ -46,6 +46,8 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
+    allowed_languages: list[str] = ["en", "ru", "kz"]
+
 
 settings = Settings()   # pyright: ignore [reportCallIssue]
                         # pydantic-settings populates fields from env at runtime;

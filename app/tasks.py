@@ -4,8 +4,9 @@ from celery import chain
 from loguru import logger
 from sqlalchemy import select
 
+from app.config import settings
 from app.db import AsyncSessionLocal
-from app.filters import is_duplicate, is_relevant
+from app.filters import is_allowed_language, is_duplicate, is_relevant
 from app.models import Keyword, NewsItem, Source
 from app.news_parser.registry import PARSERS
 from celery_worker import celery_app
@@ -72,7 +73,11 @@ def filter_task(self, news_item_ids: list[str]):
                 item = await db.get(NewsItem, news_item_id)
                 if item is None:
                     continue
-                if not await is_duplicate(item, db) and is_relevant(item, keywords):
+                if (
+                    not await is_duplicate(item, db)
+                    and is_relevant(item, keywords)
+                    and is_allowed_language(item, settings.allowed_languages)
+                ):
                     filtered_results.append(news_item_id)
 
         return filtered_results
