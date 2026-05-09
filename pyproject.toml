@@ -18,6 +18,7 @@ dependencies = [
     "redis>=7.4.0",
     "telethon>=1.43.2",
     "langdetect>=1.0.9",
+    "openai>=2.35.1",
 ]
 
 [dependency-groups]

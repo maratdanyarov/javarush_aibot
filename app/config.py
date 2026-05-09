@@ -33,7 +33,10 @@ class Settings(BaseSettings):
     telegram_session_file: str = Field(alias="TELEGRAM_SESSION_FILE")
 
     # ChatGPT
-    chat_gpt_api_key: SecretStr = Field(alias="CHATGPT_API_KEY")
+    openai_api_key: SecretStr = Field(alias="OPENAI_API_KEY")
+    openai_model: str = Field(alias="OPENAI_MODEL")
+    openai_max_retries: int = 3
+    openai_base_delay: float = 1.0
 
     # App Configuration
     debug: bool = Field(default=False, alias="DEBUG")

@@ -1,7 +1,7 @@
-from langdetect import detect, LangDetectException
+from langdetect import LangDetectException, detect
+from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from loguru import logger
 
 from app.models import NewsItem
 
