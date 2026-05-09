@@ -4,10 +4,11 @@ from celery import chain
 from loguru import logger
 from sqlalchemy import select
 
+from app.ai.generator import generate_post
 from app.config import settings
 from app.db import AsyncSessionLocal
 from app.filters import is_allowed_language, is_duplicate, is_relevant
-from app.models import Keyword, NewsItem, Source
+from app.models import Keyword, NewsItem, Post, Source
 from app.news_parser.registry import PARSERS
 from celery_worker import celery_app
 
@@ -89,13 +90,38 @@ def filter_task(self, news_item_ids: list[str]):
         raise self.retry(exc=e, countdown=60) from e
 
 
-@celery_app.task
-def generate_task(news_item_ids: list[str]):
+@celery_app.task(name="app.tasks.generate_task", bind=True, max_retries=3)
+def generate_task(self, news_item_ids: list[str]):
     logger.info("Starting generate_task.")
-    return news_item_ids
+
+    async def _run():
+        generated_posts_ids = []
+        async with AsyncSessionLocal() as db:
+            for news_item_id in news_item_ids:
+                item = await db.get(NewsItem, news_item_id)
+                if item is None:
+                    continue
+                generated_text = await generate_post(item)
+                new_post = Post(
+                    news_item_id=news_item_id,
+                    generated_text=generated_text,
+                    status="generated",
+                )
+                db.add(new_post)
+                await db.flush()
+                generated_posts_ids.append(new_post.id)
+            await db.commit()
+
+        return generated_posts_ids
+
+    try:
+        return asyncio.run(_run())
+    except Exception as e:
+        logger.error(f"Failed to run generate_task: {e}")
+        raise self.retry(exc=e, countdown=60) from e
 
 
-@celery_app.task
+@celery_app.task(name="app.tasks.publish_task", bind=True, max_retries=3)
 def publish_task(news_item_ids: list[str]):
     logger.info("Starting publish_task.")
     return

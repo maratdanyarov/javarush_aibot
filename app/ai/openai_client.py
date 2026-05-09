@@ -41,7 +41,11 @@ async def generate_text(prompt: str) -> str:
                 raise AIGenerationError("Empty response from OpenAI")
             return content.strip()
         except (RateLimitError, APIStatusError) as e:
-            if isinstance(e, APIStatusError) and not isinstance(e, RateLimitError) and e.status_code < 500:
+            if (
+                isinstance(e, APIStatusError)
+                and not isinstance(e, RateLimitError)
+                and e.status_code < 500
+            ):
                 raise AIGenerationError(f"Client error {e.status_code}: {e}") from e
 
             if attempt == max_retries:
