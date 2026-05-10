@@ -57,12 +57,40 @@ async def test_list_posts_empty(client):
     assert response.json() == []
 
 
+async def test_list_posts_filter_status(client, db_session: AsyncSession, sample_news):
+    db_session.add(
+        Post(
+            news_id=sample_news.id,
+            generated_text="New post",
+            status=PostStatus.new,
+            published_at=datetime(2022, 1, 1, tzinfo=UTC),
+        )
+    )
+    db_session.add(
+        Post(
+            news_id=sample_news.id,
+            generated_text="Published post",
+            status=PostStatus.published,
+            published_at=datetime(2022, 1, 2, tzinfo=UTC),
+        )
+    )
+    await db_session.commit()
+
+    response = await client.get("/posts?status=published")
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["status"] == "published"
+    assert data[0]["generated_text"] == "Published post"
+
+
 async def test_list_posts_pagination(client, db_session: AsyncSession, sample_news):
     for i in range(3):
         db_session.add(Post(
             news_id=sample_news.id,
             generated_text=f"Generated text {i}",
-            status="new",
+            status=PostStatus.new,
             published_at=datetime(2022, 2, 11, tzinfo=UTC),
         ))
     await db_session.commit()

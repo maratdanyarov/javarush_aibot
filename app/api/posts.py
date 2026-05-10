@@ -5,7 +5,7 @@ from starlette import status
 
 from app.api.schemas import PostRead
 from app.db import get_db
-from app.models import Post
+from app.models import Post, PostStatus
 
 router = APIRouter()
 
@@ -14,11 +14,14 @@ router = APIRouter()
 async def list_posts(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
+    status_filter: PostStatus | None = Query(default=None, alias="status"),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
-        select(Post).order_by(Post.created_at.desc()).offset(skip).limit(limit)
-    )
+    query = select(Post).order_by(Post.created_at.desc())
+    if status_filter is not None:
+        query = query.where(Post.status == status_filter)
+
+    result = await db.execute(query.offset(skip).limit(limit))
     return result.scalars().all()
 
 
