@@ -21,8 +21,9 @@ The system follows a pipeline architecture driven by Celery tasks:
 - **OpenAI**: AI engine for text generation.
 
 ## Prerequisites
-- **Python 3.12+**
-- **Redis**: Required for Celery (Docker command: `docker run -d -p 6379:6379 redis:7`)
+- **Python 3.12+** (if running locally)
+- **Docker & Docker Compose** (recommended)
+- **Redis**: Required if running locally (Docker command: `docker run -d -p 6379:6379 redis:7`)
 - **Telegram Account**: API credentials (`api_id` and `api_hash`) from [my.telegram.org](https://my.telegram.org).
 - **OpenAI API Key**: For post generation.
 - **Telegram Channel**: Where your account has administrative permissions to post.
@@ -34,36 +35,48 @@ The system follows a pipeline architecture driven by Celery tasks:
    cd javarush_aibot
    ```
 
-2. **Initialize virtual environment**:
-   ```bash
-   uv venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   uv pip install -e .
-   ```
-
-4. **Configure environment**:
+2. **Configure environment**:
    ```bash
    cp .env.example .env
    # Open .env and fill in your real credentials (API keys, DB URL, etc.)
    ```
 
-5. **Run migrations**:
+3. **Initialize local environment** (For local development/testing):
    ```bash
+   uv venv
+   source .venv/bin/activate
+   uv pip install -e .
    alembic upgrade head
    ```
 
-6. **Create Telegram session**:
-   Telethon requires interactive authentication the first time to create a session file. Run the following command and follow the prompts (enter your phone number and the code you receive on Telegram):
+4. **Create Telegram session**:
+   Telethon requires interactive authentication the first time to create a session file. This file must exist for the Docker worker to start successfully. Run the following command locally and follow the prompts:
    ```bash
    python3 -c "from app.telegram.client import get_client; import asyncio; asyncio.run(get_client().start())"
    ```
 
 ## Running the app
-To run the full pipeline, you need to start three processes in separate terminals:
+
+### Option A: Running with Docker (Recommended)
+This is the simplest way to run the full stack (API, Redis, Worker, Beat).
+
+**First time only — apply database migrations locally:**
+```bash
+alembic upgrade head
+```
+
+**Start the stack:**
+```bash
+docker-compose up --build
+```
+The services will be reachable at:
+- **Admin API**: http://localhost:8000
+- **Swagger Docs**: http://localhost:8000/docs
+
+*Note: The SQLite database (`aibot.db`) and Telegram sessions (`sessions/`) are persisted via Docker volumes.*
+
+### Option B: Running Locally (Manual)
+To run the pipeline manually, you need to start three processes in separate terminals (and ensure Redis is running):
 
 **Terminal 1: Admin API**
 ```bash
@@ -131,4 +144,4 @@ curl "http://localhost:8000/posts?status=published&limit=10"
 - [x] **E8 — AI Generation**: OpenAI client with retries and post formatting.
 - [x] **E9 — Publisher**: Idempotent Telegram publication via Telethon.
 - [x] **E10 — Wiring**: Full end-to-end Celery chain and integration tests.
-- [ ] **E11 — Polish**: Final documentation and Docker support (In Progress).
+- [x] **E11 — Polish**: Final documentation and Docker support.

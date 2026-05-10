@@ -7,10 +7,14 @@ from app.api.schemas import PostRead
 from app.db import get_db
 from app.models import Post, PostStatus
 
-router = APIRouter()
+router = APIRouter(tags=["Posts"])
 
 
-@router.get("/posts", response_model=list[PostRead])
+@router.get(
+    "/posts",
+    response_model=list[PostRead],
+    summary="List all posts with optional status filter",
+)
 async def list_posts(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
@@ -25,7 +29,7 @@ async def list_posts(
     return result.scalars().all()
 
 
-@router.get("/posts/{post_id}", response_model=PostRead)
+@router.get("/posts/{post_id}", response_model=PostRead, summary="Get post by ID")
 async def get_post(post_id: str, db: AsyncSession = Depends(get_db)):
     post = await db.get(Post, post_id)
     if not post:

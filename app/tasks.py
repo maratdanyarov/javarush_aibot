@@ -105,9 +105,11 @@ def generate_task(self, news_item_ids: list[str]):
                 try:
                     generated_text = await generate_post(item)
                 except Exception as e:
-                    logger.error(f"Failed to generate post for item '{news_item_id}': {e}")
+                    logger.error(
+                        f"Failed to generate post for item '{news_item_id}': {e}"
+                    )
                     continue
-            
+
                 new_post = Post(
                     news_id=news_item_id,
                     generated_text=generated_text,

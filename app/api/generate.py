@@ -6,10 +6,12 @@ from app.api.schemas import GenerateRequest, PostRead
 from app.db import get_db
 from app.models import NewsItem, Post
 
-router = APIRouter()
+router = APIRouter(tags=["Generation"])
 
 
-@router.post("/api/generate", response_model=PostRead)
+@router.post(
+    "/api/generate", response_model=PostRead, summary="Manually trigger post generation"
+)
 async def manual_generate(body: GenerateRequest, db: AsyncSession = Depends(get_db)):
     item = await db.get(NewsItem, body.news_item_id)
     if not item:

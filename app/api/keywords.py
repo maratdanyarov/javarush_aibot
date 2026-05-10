@@ -7,15 +7,18 @@ from app.api.schemas import KeywordCreate, KeywordRead, KeywordUpdate
 from app.db import get_db
 from app.models import Keyword
 
-router = APIRouter()
+router = APIRouter(tags=["Keywords"])
 
-@router.get("/keywords", response_model=list[KeywordRead])
+
+@router.get("/keywords", response_model=list[KeywordRead], summary="List all keywords")
 async def get_keywords(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Keyword).order_by(Keyword.id))
     return result.scalars().all()
 
 
-@router.get("/keywords/{keyword_id}", response_model=KeywordRead)
+@router.get(
+    "/keywords/{keyword_id}", response_model=KeywordRead, summary="Get keyword by ID"
+)
 async def get_keyword(keyword_id: str, db: AsyncSession = Depends(get_db)):
     keyword = await db.get(Keyword, keyword_id)
     if not keyword:
@@ -26,7 +29,10 @@ async def get_keyword(keyword_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post(
-    "/keywords", response_model=KeywordRead, status_code=status.HTTP_201_CREATED
+    "/keywords",
+    response_model=KeywordRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create new keyword",
 )
 async def create_keyword(payload: KeywordCreate, db: AsyncSession = Depends(get_db)):
     keyword = Keyword(**payload.model_dump())
@@ -36,7 +42,9 @@ async def create_keyword(payload: KeywordCreate, db: AsyncSession = Depends(get_
     return keyword
 
 
-@router.put("/keywords/{keyword_id}", response_model=KeywordRead)
+@router.put(
+    "/keywords/{keyword_id}", response_model=KeywordRead, summary="Update keyword"
+)
 async def update_keyword(
     keyword_id: str, payload: KeywordUpdate, db: AsyncSession = Depends(get_db)
 ):
@@ -55,7 +63,11 @@ async def update_keyword(
     return keyword
 
 
-@router.delete("/keywords/{keyword_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/keywords/{keyword_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete keyword",
+)
 async def delete_keyword(keyword_id: str, db: AsyncSession = Depends(get_db)):
     keyword = await db.get(Keyword, keyword_id)
     if not keyword:
