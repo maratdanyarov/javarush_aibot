@@ -103,7 +103,7 @@ def generate_task(self, news_item_ids: list[str]):
                     continue
                 generated_text = await generate_post(item)
                 new_post = Post(
-                    news_item_id=news_item_id,
+                    news_id=news_item_id,
                     generated_text=generated_text,
                     status="generated",
                 )
@@ -121,7 +121,7 @@ def generate_task(self, news_item_ids: list[str]):
         raise self.retry(exc=e, countdown=60) from e
 
 
-@celery_app.task(name="app.tasks.publish_task", bind=True, max_retries=3)
+@celery_app.task(name="app.tasks.publish_task")
 def publish_task(news_item_ids: list[str]):
     logger.info("Starting publish_task.")
     return

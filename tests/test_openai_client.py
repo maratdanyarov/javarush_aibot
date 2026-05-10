@@ -82,6 +82,7 @@ async def test_generate_text_client_error_no_retry():
         assert "401" in str(excinfo.value)
         assert mock_client.chat.completions.create.await_count == 1
 
+
 async def test_generate_text_empty_response():
     """Test that an empty response from OpenAI raises AIGenerationError."""
     with patch("app.ai.openai_client.get_ai_client") as mock_get:
@@ -95,11 +96,14 @@ async def test_generate_text_empty_response():
             await generate_text("Test prompt")
         assert "empty response" in str(excinfo.value).lower()
 
+
 async def test_generate_text_unexpected_error():
     """Test that unexpected non-OpenAI errors are wrapped in AIGenerationError."""
     with patch("app.ai.openai_client.get_ai_client") as mock_get:
         mock_client = AsyncMock()
-        mock_client.chat.completions.create.side_effect = RuntimeError("Something went wrong")
+        mock_client.chat.completions.create.side_effect = RuntimeError(
+            "Something went wrong"
+        )
         mock_get.return_value = mock_client
 
         with pytest.raises(AIGenerationError) as excinfo:

@@ -112,3 +112,6 @@ class PostRead(PostBase):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
+class GenerateRequest(BaseModel):
+    news_item_id: str
