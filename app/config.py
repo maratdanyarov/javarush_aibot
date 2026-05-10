@@ -26,7 +26,6 @@ class Settings(BaseSettings):
     celery_task_serializer: str = "json"
 
     # Telegram bot token
-    bot_token: SecretStr = Field(alias="BOT_TOKEN")
     tg_channel: str = Field(alias="TG_CHANNEL")
     telegram_api_id: int = Field(alias="TELEGRAM_API_ID")
     telegram_api_hash: SecretStr = Field(alias="TELEGRAM_API_HASH")

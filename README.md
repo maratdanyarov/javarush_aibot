@@ -122,7 +122,6 @@ curl "http://localhost:8000/posts?status=published&limit=10"
 | `REDIS_URL` | Yes | Redis broker URL (e.g., `redis://localhost:6379/0`)                   |
 | `TELEGRAM_API_ID` | Yes | Your Telegram API ID                                                  |
 | `TELEGRAM_API_HASH` | Yes | Your Telegram API Hash                                                |
-| `BOT_TOKEN` | Yes | Your telegram bot token.                                              |
 | `TG_CHANNEL` | Yes | Target channel username (e.g., `@my_news_channel`)                    |
 | `TELEGRAM_SESSION_FILE` | Yes | Path to Telethon session file (e.g., `sessions/aibot`)                |
 | `OPENAI_API_KEY` | Yes | Your OpenAI API Key                                                   |

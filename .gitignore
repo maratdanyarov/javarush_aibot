@@ -223,7 +223,3 @@ __marimo__/
 # Telethon session
 *.session
 *.session-journal
-
-CLAUDE.md
-TICKETS.md
-GEMINI.md
