@@ -102,7 +102,12 @@ def generate_task(self, news_item_ids: list[str]):
                 item = await db.get(NewsItem, news_item_id)
                 if item is None:
                     continue
-                generated_text = await generate_post(item)
+                try:
+                    generated_text = await generate_post(item)
+                except Exception as e:
+                    logger.error(f"Failed to generate post for item '{news_item_id}': {e}")
+                    continue
+            
                 new_post = Post(
                     news_id=news_item_id,
                     generated_text=generated_text,
