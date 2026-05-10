@@ -10,6 +10,7 @@ from app.db import AsyncSessionLocal
 from app.filters import is_allowed_language, is_duplicate, is_relevant
 from app.models import Keyword, NewsItem, Post, Source
 from app.news_parser.registry import PARSERS
+from app.telegram.publisher import publish_post
 from celery_worker import celery_app
 
 
@@ -121,7 +122,23 @@ def generate_task(self, news_item_ids: list[str]):
         raise self.retry(exc=e, countdown=60) from e
 
 
-@celery_app.task(name="app.tasks.publish_task")
-def publish_task(news_item_ids: list[str]):
+@celery_app.task(name="app.tasks.publish_task", bind=True, max_retries=3)
+def publish_task(self, post_ids: list[str]):
     logger.info("Starting publish_task.")
-    return
+
+    async def _run():
+        async with AsyncSessionLocal() as db:
+            for post_id in post_ids:
+                post = await db.get(Post, post_id)
+                if post is None:
+                    continue
+                try:
+                    await publish_post(post, db)
+                except Exception as e:
+                    logger.error(f"Task execution failed for post {post_id}: {e}")
+
+    try:
+        return asyncio.run(_run())
+    except Exception as e:
+        logger.error(f"Failed to run publish_task: {e}")
+        raise self.retry(exc=e, countdown=60) from e
