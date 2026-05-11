@@ -52,6 +52,7 @@ The system follows a pipeline architecture driven by Celery tasks:
 4. **Create Telegram session**:
    Telethon requires interactive authentication the first time to create a session file. This file must exist for the Docker worker to start successfully. Run the following command locally and follow the prompts:
    ```bash
+   mkdir sessions
    python3 -c "from app.telegram.client import get_client; import asyncio; asyncio.run(get_client().start())"
    ```
 
