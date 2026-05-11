@@ -1,3 +1,5 @@
+"""Celery tasks for the four-stage news pipeline: fetch → filter → generate → publish."""
+
 import asyncio
 
 from celery import chain
@@ -16,6 +18,7 @@ from celery_worker import celery_app
 
 @celery_app.task(name="app.tasks.fetch_news_task", bind=True, max_retries=3)
 def fetch_news_task(self):
+    """Fetch fresh news from all enabled sources and chain to the filter/generate/publish tasks."""
     logger.info("Starting scheduled fetch_news_task.")
 
     async def _run():
@@ -62,6 +65,7 @@ def fetch_news_task(self):
 
 @celery_app.task(name="app.tasks.filter_task", bind=True, max_retries=3)
 def filter_task(self, news_item_ids: list[str]):
+    """Filter *news_item_ids* by keyword relevance, deduplication, and allowed language."""
     logger.info("Starting filter_task.")
 
     async def _run():
@@ -93,6 +97,7 @@ def filter_task(self, news_item_ids: list[str]):
 
 @celery_app.task(name="app.tasks.generate_task", bind=True, max_retries=3)
 def generate_task(self, news_item_ids: list[str]):
+    """Generate AI posts for each news item ID and return the list of created Post IDs."""
     logger.info("Starting generate_task.")
 
     async def _run():
@@ -131,6 +136,7 @@ def generate_task(self, news_item_ids: list[str]):
 
 @celery_app.task(name="app.tasks.publish_task", bind=True, max_retries=3)
 def publish_task(self, post_ids: list[str]):
+    """Publish each Post in *post_ids* to the configured Telegram channel."""
     logger.info("Starting publish_task.")
 
     async def _run():

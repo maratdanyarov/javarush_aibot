@@ -1,3 +1,5 @@
+"""Tests for news item filter predicates: relevance, deduplication, and language checks."""
+
 from datetime import UTC, datetime
 from unittest.mock import patch
 

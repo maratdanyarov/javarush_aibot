@@ -1,3 +1,5 @@
+"""Celery application factory, broker/backend configuration, and periodic beat schedule."""
+
 from celery import Celery
 from celery.schedules import crontab
 

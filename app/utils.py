@@ -1,3 +1,5 @@
+"""Shared utility helpers: content hashing and database-level duplicate detection."""
+
 import hashlib
 
 from sqlalchemy import select
@@ -16,6 +18,7 @@ def make_content_hash(title: str, url: str = "") -> str:
 
 
 async def is_duplicate(content_hash: str, db: AsyncSession) -> bool:
+    """Return True if a NewsItem with *content_hash* already exists in the database."""
     result = await db.execute(
         select(NewsItem.id).where(NewsItem.content_hash == content_hash).limit(1)
     )

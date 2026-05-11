@@ -1,3 +1,5 @@
+"""Integration tests for the posts read-only API endpoints."""
+
 from datetime import UTC, datetime
 
 import pytest

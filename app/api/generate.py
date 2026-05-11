@@ -1,3 +1,5 @@
+"""API endpoint for manually triggering AI post generation from a stored news item."""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +15,7 @@ router = APIRouter(tags=["Generation"])
     "/api/generate", response_model=PostRead, summary="Manually trigger post generation"
 )
 async def manual_generate(body: GenerateRequest, db: AsyncSession = Depends(get_db)):
+    """Trigger AI generation for the given news item and persist the resulting Post."""
     item = await db.get(NewsItem, body.news_item_id)
     if not item:
         raise HTTPException(status_code=404, detail="News item not found")

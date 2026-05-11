@@ -1,4 +1,4 @@
-"""Project settings"""
+"""Application settings loaded from environment variables and the .env file."""
 
 from enum import StrEnum
 
@@ -7,6 +7,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class LogLevel(StrEnum):
+    """Valid log level values accepted by the application logger."""
+
     INFO = "INFO"
     DEBUG = "DEBUG"
     ERROR = "ERROR"
@@ -14,7 +16,7 @@ class LogLevel(StrEnum):
 
 
 class Settings(BaseSettings):
-    """Settings class"""
+    """Pydantic-settings model: reads and validates all runtime configuration from environment variables."""
 
     # Database
     database_url: str = Field(alias="DATABASE_URL")

@@ -1,3 +1,5 @@
+"""FastAPI application entry point: configures logging and registers all API routers."""
+
 from fastapi import FastAPI
 from loguru import logger
 

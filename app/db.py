@@ -1,3 +1,5 @@
+"""Async SQLAlchemy engine, session factory, and FastAPI DB dependency."""
+
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 

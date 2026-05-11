@@ -1,3 +1,5 @@
+"""Async OpenAI client with exponential back-off retry logic for transient API errors."""
+
 import asyncio
 import random
 
@@ -8,6 +10,8 @@ from app.config import settings
 
 
 class AIGenerationError(Exception):
+    """Raised when AI text generation fails after retries are exhausted or on a non-retryable error."""
+
     pass
 
 
@@ -15,6 +19,7 @@ _client: AsyncOpenAI | None = None
 
 
 def get_ai_client() -> AsyncOpenAI:
+    """Return the shared AsyncOpenAI singleton, creating it on the first call."""
     global _client
     if _client is None:
         _client = AsyncOpenAI(
@@ -24,6 +29,11 @@ def get_ai_client() -> AsyncOpenAI:
 
 
 async def generate_text(prompt: str) -> str:
+    """Call the configured OpenAI model with *prompt* and return the stripped response text.
+
+    Retries on rate-limit (429) and server errors (5xx) with exponential back-off.
+    Raises AIGenerationError on non-retryable client errors or when retries are exhausted.
+    """
     client = get_ai_client()
     max_retries = settings.openai_max_retries
     base_delay = settings.openai_base_delay

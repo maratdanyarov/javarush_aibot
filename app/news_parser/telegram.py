@@ -1,3 +1,5 @@
+"""Telegram channel parser: fetches recent messages via the Telethon MTProto client."""
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import NewsItem, Source
@@ -6,10 +8,14 @@ from app.utils import is_duplicate, make_content_hash
 
 
 class TelegramParser:
+    """Fetches recent messages from a Telegram channel via the Telethon MTProto client."""
+
     def __init__(self, limit: int = 20):
+        """Configure the parser to fetch at most *limit* recent messages per channel."""
         self.limit = limit
 
     async def fetch(self, source: Source, db_session: AsyncSession) -> list[NewsItem]:
+        """Fetch recent messages from a Telegram channel, skip duplicates, and persist new items."""
         async with get_client() as client:
             news_items = []
             channel_name = source.url.rstrip("/").split("/")[-1]

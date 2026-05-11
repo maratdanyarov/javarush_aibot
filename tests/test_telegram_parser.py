@@ -1,3 +1,5 @@
+"""Tests for the Telegram channel parser: successful fetch and duplicate-skipping."""
+
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 

@@ -1,3 +1,5 @@
+"""Tests for the POST /api/generate endpoint (manual AI post generation)."""
+
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, patch
 

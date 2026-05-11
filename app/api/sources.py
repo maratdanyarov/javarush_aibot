@@ -1,3 +1,5 @@
+"""CRUD endpoints for managing news sources (RSS feeds and Telegram channels)."""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +16,7 @@ router = APIRouter(tags=["Sources"])
     "/sources", response_model=list[SourceRead], summary="List all news sources"
 )
 async def list_sources(db: AsyncSession = Depends(get_db)):
+    """Return all sources ordered by creation date descending."""
     result = await db.execute(select(Source).order_by(Source.created_at.desc()))
     return result.scalars().all()
 
@@ -22,6 +25,7 @@ async def list_sources(db: AsyncSession = Depends(get_db)):
     "/sources/{source_id}", response_model=SourceRead, summary="Get source by ID"
 )
 async def get_source(source_id: str, db: AsyncSession = Depends(get_db)):
+    """Return a single source by its UUID, or 404 if not found."""
     source = await db.get(Source, source_id)
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
@@ -35,6 +39,7 @@ async def get_source(source_id: str, db: AsyncSession = Depends(get_db)):
     summary="Create new news source",
 )
 async def create_source(payload: SourceCreate, db: AsyncSession = Depends(get_db)):
+    """Create and persist a new news source, returning the saved record."""
     source = Source(**payload.model_dump())
     db.add(source)
     await db.commit()
@@ -48,6 +53,7 @@ async def create_source(payload: SourceCreate, db: AsyncSession = Depends(get_db
 async def update_source(
     source_id: str, payload: SourceUpdate, db: AsyncSession = Depends(get_db)
 ):
+    """Partially update a source's fields, returning the updated record."""
     source = await db.get(Source, source_id)
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
@@ -67,6 +73,7 @@ async def update_source(
     summary="Delete news source",
 )
 async def delete_source(source_id: str, db: AsyncSession = Depends(get_db)):
+    """Delete a source by its UUID and return 204 No Content."""
     source = await db.get(Source, source_id)
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")

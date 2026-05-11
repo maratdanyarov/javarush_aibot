@@ -1,3 +1,5 @@
+"""Read-only endpoints for browsing generated and published posts."""
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +23,7 @@ async def list_posts(
     status_filter: PostStatus | None = Query(default=None, alias="status"),
     db: AsyncSession = Depends(get_db),
 ):
+    """Return a paginated list of posts ordered by creation date, optionally filtered by status."""
     query = select(Post).order_by(Post.created_at.desc())
     if status_filter is not None:
         query = query.where(Post.status == status_filter)
@@ -31,6 +34,7 @@ async def list_posts(
 
 @router.get("/posts/{post_id}", response_model=PostRead, summary="Get post by ID")
 async def get_post(post_id: str, db: AsyncSession = Depends(get_db)):
+    """Return a single post by its UUID, or 404 if not found."""
     post = await db.get(Post, post_id)
     if not post:
         raise HTTPException(

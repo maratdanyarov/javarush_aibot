@@ -1,3 +1,5 @@
+"""Telegram post generator: formats NewsItems into channel-ready posts via the OpenAI API."""
+
 from app.ai.openai_client import generate_text
 from app.models import NewsItem
 
@@ -23,6 +25,7 @@ PROMPT = """Ты — редактор новостного Telegram-канала
 
 
 async def generate_post(item: NewsItem) -> str:
+    """Format *item* into a prompt and return the AI-generated Telegram post text."""
     prompt = PROMPT.format(
         title=item.title, source=item.source, summary=item.summary[:1500]
     )

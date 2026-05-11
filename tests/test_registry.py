@@ -1,3 +1,5 @@
+"""Tests for the parser registry: verifies SourceType → parser class mapping."""
+
 from app.models import SourceType
 from app.news_parser.registry import PARSERS
 from app.news_parser.sites import SiteParser

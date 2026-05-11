@@ -1,3 +1,5 @@
+"""Maps SourceType enum values to their concrete parser implementations."""
+
 from app.models import SourceType
 from app.news_parser.base import ParserProtocol
 from app.news_parser.sites import SiteParser

@@ -1,3 +1,5 @@
+"""Publishes AI-generated posts to the configured Telegram channel via Telethon."""
+
 from datetime import UTC, datetime
 
 from loguru import logger
@@ -9,6 +11,7 @@ from app.telegram.client import get_client
 
 
 async def publish_post(post: Post, db: AsyncSession) -> None:
+    """Send *post* to the configured Telegram channel and update its status to published or failed."""
     if post.status == PostStatus.published:
         logger.info(f"Post {post.id} already published. Skipping.")
         return

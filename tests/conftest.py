@@ -1,3 +1,5 @@
+"""Shared pytest fixtures: in-memory SQLite database, async DB session, and HTTP test client."""
+
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import StaticPool

@@ -1,3 +1,5 @@
+"""End-to-end integration test covering the full fetch → filter → generate → publish pipeline."""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

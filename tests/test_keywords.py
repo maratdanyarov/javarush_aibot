@@ -1,3 +1,5 @@
+"""Integration tests for the keywords CRUD API endpoints."""
+
 import pytest
 from starlette import status
 

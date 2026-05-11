@@ -1,3 +1,5 @@
+"""SQLAlchemy ORM models for sources, news items, posts, and keywords."""
+
 import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -8,15 +10,21 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
+    """Declarative base for all SQLAlchemy ORM models."""
+
     pass
 
 
 class SourceType(StrEnum):
+    """Discriminates between website RSS feeds and Telegram channel sources."""
+
     site = "site"
     telegram = "tg"
 
 
 class PostStatus(StrEnum):
+    """Lifecycle state of an AI-generated post."""
+
     new = "new"
     generated = "generated"
     published = "published"
@@ -24,6 +32,8 @@ class PostStatus(StrEnum):
 
 
 class Source(Base):
+    """An RSS feed or Telegram channel that the bot monitors for new content."""
+
     __tablename__ = "sources"
 
     id: Mapped[str] = mapped_column(
@@ -44,6 +54,8 @@ class Source(Base):
 
 
 class NewsItem(Base):
+    """A single article or Telegram message fetched from a Source."""
+
     __tablename__ = "news_items"
 
     id: Mapped[str] = mapped_column(
@@ -72,6 +84,8 @@ class NewsItem(Base):
 
 
 class Post(Base):
+    """An AI-generated Telegram post derived from a NewsItem."""
+
     __tablename__ = "posts"
 
     id: Mapped[str] = mapped_column(
@@ -94,6 +108,8 @@ class Post(Base):
 
 
 class Keyword(Base):
+    """A keyword used to filter news items for relevance during the pipeline."""
+
     __tablename__ = "keywords"
 
     id: Mapped[str] = mapped_column(

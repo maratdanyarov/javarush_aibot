@@ -1,3 +1,5 @@
+"""RSS feed parser: fetches, parses, and persists news items from website sources."""
+
 import asyncio
 from datetime import UTC, datetime
 
@@ -12,7 +14,10 @@ from app.utils import is_duplicate, make_content_hash
 
 
 class SiteParser:
+    """Fetches news from an RSS feed URL, deduplicates items, and persists new ones."""
+
     async def fetch(self, source: Source, db_session: AsyncSession) -> list[NewsItem]:
+        """Fetch and save new RSS items from *source*, returning the newly created NewsItems."""
         raw_news_items = await _parse_rss(source.url)
         if not raw_news_items:
             logger.info(f"No news found for {source.url}")
@@ -128,6 +133,7 @@ async def _parse_rss(url: str) -> list[dict]:
 
 
 def _parse_date(entry) -> datetime:
+    """Extract a timezone-aware UTC datetime from a feedparser entry, falling back to now()."""
     for field in ("published_parsed", "updated_parsed", "created_parsed"):
         value = entry.get(field)
         if value:
@@ -141,6 +147,7 @@ def _parse_date(entry) -> datetime:
 
 
 def _strip_html(text: str) -> str:
+    """Strip HTML tags from *text* using BeautifulSoup and return plain text."""
     if not text:
         return ""
     return BeautifulSoup(text, "html.parser").get_text(separator="").strip()

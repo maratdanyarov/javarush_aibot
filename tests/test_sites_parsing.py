@@ -1,3 +1,5 @@
+"""Tests for the RSS site parser: successful fetch and duplicate-skipping behaviour."""
+
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 

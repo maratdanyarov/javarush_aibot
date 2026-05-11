@@ -1,3 +1,5 @@
+"""Unit tests for the OpenAI client wrapper, including retry and error-handling behavior."""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
