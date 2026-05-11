@@ -31,7 +31,7 @@ The system follows a pipeline architecture driven by Celery tasks:
 ## Setup
 1. **Clone the repository**:
    ```bash
-   git clone <repository_url>
+   git clone <git@github.com:maratdanyarov/javarush_aibot.git>
    cd javarush_aibot
    ```
 
